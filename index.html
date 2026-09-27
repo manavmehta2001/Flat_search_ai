@@ -1,0 +1,790 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Journey Home</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..700&family=Karla:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+  :root{
+    --sky-dusk:#241a35;
+    --sky-amber:#c9683c;
+    --sky-gold:#f0b25c;
+    --ink:#2b2118;
+    --ink-soft:#5b4d3f;
+    --paper:#fdf6ec;
+    --paper-shade:#f4e8d6;
+    --line:rgba(43,33,24,.14);
+    --accent:#8c3350;
+    --accent-ink:#fdf6ec;
+    --pine:#3d6a5c;
+    --warn:#a63f28;
+    --shadow:0 10px 30px -12px rgba(43,26,20,.35);
+    color-scheme:light;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Karla',ui-sans-serif,system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.display{
+    font-family:'Fraunces',Georgia,'Times New Roman',serif;
+    font-weight:600;
+    text-wrap:balance;
+    color:var(--ink);
+    margin:0;
+  }
+  .mono{font-family:'IBM Plex Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums;}
+  button{font-family:inherit}
+  img{max-width:100%;}
+  [hidden]{display:none!important;}
+  .app{max-width:1040px;margin:0 auto;padding:0 20px calc(48px + env(safe-area-inset-bottom,0px));}
+
+  /* ---------- header / skyline ---------- */
+  .skyline-wrap{
+    position:relative;
+    height:220px;
+    overflow:hidden;
+    display:flex;
+    align-items:flex-end;
+    justify-content:center;
+  }
+  .skyline-wrap svg{position:absolute;inset:0;width:100%;height:100%;display:block;}
+  .skyline-title{
+    position:relative;
+    z-index:2;
+    text-align:center;
+    padding-bottom:22px;
+    color:#fff3e2;
+  }
+  .skyline-title h1{
+    font-size:clamp(2rem,6vw,3rem);
+    color:#fff6ea;
+    text-shadow:0 3px 18px rgba(20,10,10,.45);
+    letter-spacing:.01em;
+  }
+  .skyline-title p{
+    margin:6px 0 0;
+    font-size:.95rem;
+    color:#ffe3bf;
+    text-shadow:0 2px 10px rgba(20,10,10,.4);
+  }
+
+  /* ---------- tab bar ---------- */
+  nav.tabs{
+    display:flex;
+    justify-content:center;
+    margin:-26px auto 28px;
+    position:relative;
+    z-index:3;
+  }
+  .tabs-inner{
+    display:flex;
+    gap:4px;
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:999px;
+    padding:4px;
+    box-shadow:var(--shadow);
+    max-width:100%;
+    overflow-x:auto;
+  }
+  .tabs-inner button{
+    border:none;
+    background:transparent;
+    color:var(--ink-soft);
+    padding:10px 18px;
+    border-radius:999px;
+    font-size:.88rem;
+    font-weight:600;
+    cursor:pointer;
+    white-space:nowrap;
+    transition:background .15s,color .15s;
+  }
+  .tabs-inner button.active{background:var(--accent);color:var(--accent-ink);}
+  .tabs-inner button:not(.active):hover{background:var(--paper-shade);}
+
+  section.screen{display:flex;flex-direction:column;gap:18px;}
+  section.screen[hidden]{display:none;}
+
+  /* ---------- cards ---------- */
+  .card{
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:22px;
+    box-shadow:var(--shadow);
+  }
+  .card h2{font-size:1.3rem;margin-bottom:4px;}
+  .card .sub{color:var(--ink-soft);font-size:.9rem;margin-bottom:16px;}
+
+  .person-picker{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;}
+  .person-btn{
+    flex:1 1 140px;
+    display:flex;flex-direction:column;align-items:center;gap:4px;
+    border:1.5px solid var(--line);
+    background:var(--paper);
+    border-radius:14px;
+    padding:12px 10px;
+    cursor:pointer;
+    font-weight:600;
+    color:var(--ink);
+  }
+  .person-btn small{font-weight:500;color:var(--ink-soft);font-size:.75rem;}
+  .person-btn.active{border-color:var(--accent);background:#fbeef2;}
+  .person-btn .dot{width:8px;height:8px;border-radius:50%;background:var(--line);}
+  .person-btn.filled .dot{background:var(--pine);}
+
+  label.field{display:flex;flex-direction:column;gap:6px;font-size:.85rem;font-weight:600;color:var(--ink-soft);margin-bottom:14px;}
+  label.field input[type=text],
+  label.field input[type=number],
+  label.field textarea,
+  label.field select{
+    font-family:'Karla',sans-serif;
+    font-size:1rem;
+    font-weight:500;
+    color:var(--ink);
+    padding:10px 12px;
+    border:1.5px solid var(--line);
+    border-radius:10px;
+    background:var(--paper);
+    width:100%;
+  }
+  label.field input:focus,label.field textarea:focus,label.field select:focus{outline:2px solid var(--accent);outline-offset:1px;}
+  .hint{font-weight:400;color:var(--ink-soft);font-size:.78rem;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 16px;}
+  @media (max-width:520px){.grid2{grid-template-columns:1fr;}}
+
+  .check-row{display:flex;align-items:center;gap:10px;padding:9px 0;font-weight:600;font-size:.92rem;border-bottom:1px dashed var(--line);}
+  .check-row:last-child{border-bottom:none;}
+  .check-row input{width:18px;height:18px;accent-color:var(--accent);}
+
+  .chip-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px 14px;margin:8px 0 4px;}
+  .chip{display:flex;align-items:center;gap:8px;font-size:.85rem;font-weight:500;color:var(--ink);}
+  .chip input{width:16px;height:16px;accent-color:var(--pine);flex:none;}
+
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    background:var(--accent);color:var(--accent-ink);
+    border:none;border-radius:999px;
+    padding:12px 22px;font-weight:700;font-size:.95rem;
+    cursor:pointer;
+  }
+  .btn:hover{filter:brightness(1.06);}
+  .btn.secondary{background:transparent;color:var(--accent);border:1.5px solid var(--accent);}
+  .btn.ghost{background:transparent;color:var(--ink-soft);border:1.5px solid var(--line);}
+  .btn:disabled{opacity:.55;cursor:default;}
+  .save-row{display:flex;align-items:center;gap:12px;margin-top:6px;flex-wrap:wrap;}
+  .save-msg{font-size:.82rem;color:var(--pine);font-weight:600;}
+
+  /* ---------- flats list ---------- */
+  .flat-row{
+    display:flex;justify-content:space-between;align-items:center;gap:12px;
+    padding:12px 14px;border:1px solid var(--line);border-radius:12px;margin-bottom:8px;background:var(--paper);
+  }
+  .flat-row .meta{font-size:.82rem;color:var(--ink-soft);}
+  .flat-row .name{font-weight:700;}
+  .icon-btn{border:none;background:transparent;color:var(--warn);font-size:1.1rem;cursor:pointer;padding:4px 8px;line-height:1;}
+
+  /* ---------- compare ---------- */
+  .banner{background:var(--paper-shade);border:1px solid var(--line);border-radius:14px;padding:14px 18px;font-size:.9rem;color:var(--ink-soft);}
+  details.eliminated{border:1px solid var(--line);border-radius:14px;padding:14px 18px;background:var(--paper);}
+  details.eliminated summary{cursor:pointer;font-weight:700;}
+  .elim-item{padding:8px 0;border-top:1px dashed var(--line);font-size:.85rem;color:var(--ink-soft);}
+  .elim-item b{color:var(--warn);}
+
+  .results-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px;align-items:start;}
+  .flat-card{background:#fff;border:2px solid var(--line);border-radius:18px;padding:20px;box-shadow:var(--shadow);position:relative;}
+  .flat-card.best{border-color:var(--pine);}
+  .rank-badge{position:absolute;top:-12px;left:18px;background:var(--pine);color:#fff;font-size:.72rem;font-weight:700;padding:4px 10px;border-radius:999px;letter-spacing:.03em;text-transform:uppercase;}
+  .flat-card h3{font-size:1.25rem;}
+  .flat-card .rent{font-size:1.5rem;font-weight:600;color:var(--accent);margin:6px 0 12px;}
+  .fact-list{display:grid;grid-template-columns:1fr 1fr;gap:6px 10px;font-size:.82rem;color:var(--ink-soft);margin-bottom:14px;}
+  .fact-list b{color:var(--ink);}
+  .score-bar-track{height:8px;border-radius:999px;background:var(--paper-shade);overflow:hidden;margin-bottom:6px;}
+  .score-bar-fill{height:100%;background:var(--pine);border-radius:999px;}
+  .score-label{font-size:.78rem;color:var(--ink-soft);margin-bottom:14px;}
+  .person-match{font-size:.8rem;margin-bottom:6px;}
+  .person-match b{display:inline-block;width:64px;}
+  .match-ok{color:var(--pine);font-weight:600;}
+  .match-gap{color:var(--warn);}
+  .ai-box{margin-top:14px;padding-top:14px;border-top:1px solid var(--line);}
+  .ai-text{font-size:.88rem;line-height:1.5;color:var(--ink);background:var(--paper-shade);border-radius:12px;padding:12px 14px;}
+  .ai-text.loading{color:var(--ink-soft);font-style:italic;}
+
+  .empty-state{text-align:center;color:var(--ink-soft);padding:30px 10px;font-size:.95rem;}
+  .footnote{text-align:center;font-size:.78rem;color:var(--ink-soft);margin-top:6px;}
+</style>
+</head>
+<body>
+
+<div class="skyline-wrap">
+  <svg viewBox="0 0 800 220" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#241a35"/>
+        <stop offset="45%" stop-color="#7a3450"/>
+        <stop offset="72%" stop-color="#c9683c"/>
+        <stop offset="100%" stop-color="#f0b25c"/>
+      </linearGradient>
+      <radialGradient id="sun" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#fff2d6"/>
+        <stop offset="55%" stop-color="#f7c876"/>
+        <stop offset="100%" stop-color="#f7c876" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+    <rect width="800" height="220" fill="url(#sky)"/>
+    <circle cx="400" cy="150" r="120" fill="url(#sun)"/>
+    <circle cx="400" cy="150" r="34" fill="#fff3d9"/>
+    <g fill="#20142a" opacity="0.92">
+      <rect x="0" y="150" width="46" height="70"/>
+      <rect x="50" y="120" width="34" height="100"/>
+      <rect x="88" y="160" width="52" height="60"/>
+      <rect x="145" y="100" width="30" height="120"/>
+      <rect x="180" y="140" width="44" height="80"/>
+      <rect x="228" y="90" width="26" height="130"/>
+      <rect x="258" y="150" width="60" height="70"/>
+      <rect x="322" y="115" width="30" height="105"/>
+      <rect x="356" y="70" width="28" height="150"/>
+      <rect x="388" y="130" width="46" height="90"/>
+      <rect x="438" y="95" width="30" height="125"/>
+      <rect x="472" y="150" width="58" height="70"/>
+      <rect x="534" y="112" width="28" height="108"/>
+      <rect x="566" y="145" width="44" height="75"/>
+      <rect x="614" y="88" width="26" height="132"/>
+      <rect x="644" y="150" width="54" height="70"/>
+      <rect x="702" y="118" width="30" height="102"/>
+      <rect x="736" y="155" width="64" height="65"/>
+    </g>
+    <g fill="#fbdf9e" opacity="0.85">
+      <rect x="58" y="132" width="5" height="7"/><rect x="68" y="132" width="5" height="7"/>
+      <rect x="58" y="150" width="5" height="7"/><rect x="68" y="168" width="5" height="7"/>
+      <rect x="150" y="115" width="5" height="7"/><rect x="150" y="140" width="5" height="7"/>
+      <rect x="235" y="105" width="5" height="7"/><rect x="235" y="130" width="5" height="7"/>
+      <rect x="362" y="90" width="5" height="7"/><rect x="362" y="115" width="5" height="7"/><rect x="372" y="140" width="5" height="7"/>
+      <rect x="445" y="112" width="5" height="7"/><rect x="445" y="140" width="5" height="7"/>
+      <rect x="540" y="130" width="5" height="7"/><rect x="550" y="150" width="5" height="7"/>
+      <rect x="620" y="108" width="5" height="7"/><rect x="620" y="135" width="5" height="7"/>
+      <rect x="710" y="140" width="5" height="7"/><rect x="710" y="165" width="5" height="7"/>
+    </g>
+  </svg>
+  <div class="skyline-title">
+    <h1>Journey Home</h1>
+    <p>Riya, Meera &amp; Kavita — choosing a flat together, without the arguments</p>
+  </div>
+</div>
+
+<nav class="tabs">
+  <div class="tabs-inner">
+    <button data-tab="people" class="active">My Requirements</button>
+    <button data-tab="flats">Add a Flat</button>
+    <button data-tab="compare">Compare</button>
+  </div>
+</nav>
+
+<div class="app">
+
+  <!-- ===================== SCREEN 1: PEOPLE ===================== -->
+  <section class="screen" id="screen-people">
+    <div class="card">
+      <h2>Whose requirements are these?</h2>
+      <p class="sub">Each of you fills this in separately. Pick your name — anything already saved will load automatically. The green dot means that person has saved their answers.</p>
+
+      <div class="person-picker" id="personPicker"></div>
+
+      <form id="personForm">
+        <label class="field">
+          Maximum rent you can pay
+          <input type="number" min="0" step="500" id="p-maxRent" placeholder="e.g. 35000" required>
+        </label>
+
+        <label class="field">
+          Areas you will NOT consider
+          <input type="text" id="p-excludedAreas" placeholder="e.g. Andheri East, Powai (comma separated)">
+          <span class="hint">Separate multiple areas with commas. Leave blank if none.</span>
+        </label>
+
+        <h3 style="font-size:1rem;margin:6px 0 2px;">Must-haves (dealbreakers)</h3>
+        <p class="hint" style="margin-bottom:8px;">If a flat fails any of these, it's dropped from consideration entirely — no exceptions.</p>
+        <div class="check-row"><input type="checkbox" id="p-needsLift"><label for="p-needsLift">The building must have a lift</label></div>
+        <div class="check-row"><input type="checkbox" id="p-needsParking"><label for="p-needsParking">Must include parking</label></div>
+        <div class="check-row"><input type="checkbox" id="p-petFriendly"><label for="p-petFriendly">Must be pet-friendly</label></div>
+        <label class="field" style="margin-top:14px;">
+          Minimum number of bathrooms
+          <input type="number" min="0" max="10" step="1" id="p-minBathrooms" placeholder="e.g. 2">
+        </label>
+
+        <h3 style="font-size:1rem;margin:10px 0 2px;">Nice-to-haves</h3>
+        <p class="hint" style="margin-bottom:4px;">Things you'd prefer, but can live without.</p>
+        <div class="chip-grid" id="p-niceToHaves"></div>
+        <label class="field" style="margin-top:10px;">
+          Anything else you'd love (optional)
+          <input type="text" id="p-otherNotes" placeholder="e.g. rooftop access, quiet street">
+        </label>
+
+        <div class="save-row">
+          <button type="submit" class="btn">Save my answers</button>
+          <span class="save-msg" id="personSaveMsg"></span>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- ===================== SCREEN 2: FLATS ===================== -->
+  <section class="screen" id="screen-flats" hidden>
+    <div class="card">
+      <h2>Add a flat you're considering</h2>
+      <p class="sub">Enter the details as you find listings. Everyone will see it appear on the Compare screen.</p>
+
+      <form id="flatForm">
+        <div class="grid2">
+          <label class="field">
+            Area / neighbourhood
+            <input type="text" id="f-area" placeholder="e.g. Bandra West" required>
+          </label>
+          <label class="field">
+            Monthly rent
+            <input type="number" min="0" step="500" id="f-rent" placeholder="e.g. 42000" required>
+          </label>
+        </div>
+        <div class="grid2">
+          <label class="field">
+            Floor
+            <input type="text" id="f-floor" placeholder="e.g. 3rd of 5">
+          </label>
+          <label class="field">
+            Bathrooms
+            <input type="number" min="0" max="10" step="1" id="f-bathrooms" placeholder="e.g. 2">
+          </label>
+        </div>
+        <div class="grid2">
+          <label class="field">
+            Lift?
+            <select id="f-lift"><option value="yes">Yes</option><option value="no">No</option></select>
+          </label>
+          <label class="field">
+            Parking?
+            <select id="f-parking"><option value="yes">Yes</option><option value="no">No</option></select>
+          </label>
+        </div>
+        <label class="field">
+          Pet policy
+          <select id="f-petPolicy">
+            <option value="allowed">Pets allowed</option>
+            <option value="not-allowed">Not allowed</option>
+            <option value="case-by-case">Case-by-case / unclear</option>
+          </select>
+        </label>
+
+        <h3 style="font-size:1rem;margin:10px 0 2px;">Which nice-to-haves does this flat have?</h3>
+        <div class="chip-grid" id="f-niceToHaves"></div>
+
+        <label class="field" style="margin-top:10px;">
+          Notes
+          <textarea id="f-notes" rows="3" placeholder="Anything else worth remembering — landlord, condition, commute..."></textarea>
+        </label>
+
+        <div class="save-row">
+          <button type="submit" class="btn">Add flat</button>
+          <span class="save-msg" id="flatSaveMsg"></span>
+        </div>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>Flats added so far</h2>
+      <div id="flatsList"><p class="empty-state">No flats added yet.</p></div>
+    </div>
+  </section>
+
+  <!-- ===================== SCREEN 3: COMPARE ===================== -->
+  <section class="screen" id="screen-compare" hidden>
+    <div id="compareStatus" class="banner" hidden></div>
+    <div class="card" id="compareSummaryCard">
+      <h2>Top matches</h2>
+      <p class="sub">Dealbreakers already applied — every flat shown here works for all three of you. Scored by how many of everyone's nice-to-haves it covers. This is a comparison only: you three still decide.</p>
+      <div class="results-grid" id="resultsGrid"></div>
+    </div>
+    <details class="eliminated" id="eliminatedBox" hidden>
+      <summary id="eliminatedSummary">Flats ruled out</summary>
+      <div id="eliminatedList"></div>
+    </details>
+  </section>
+
+</div>
+
+<script src="/matching.js"></script>
+<script>
+(function(){
+  "use strict";
+
+  var M = window.JourneyHomeMatching;
+  var NICE_TO_HAVES = M.NICE_TO_HAVES;
+  var PEOPLE = M.PEOPLE;
+  var labelFor = M.labelFor;
+  var checkDealbreakers = M.checkDealbreakers;
+  var scoreFlat = M.scoreFlat;
+
+  var currentPerson = 'riya';
+  var state = { people: {}, flats: [] };
+  var pollTimer = null;
+
+  function $(id){ return document.getElementById(id); }
+  function esc(s){ return (s==null?'':String(s)).replace(/[&<>"']/g, function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+
+  function api(path, options){
+    return fetch(path, options).then(function(r){
+      return r.json().then(function(body){
+        if (!r.ok) throw new Error(body && body.error ? body.error : ('Request failed (' + r.status + ')'));
+        return body;
+      });
+    });
+  }
+
+  /* ---------------- tabs ---------------- */
+  document.querySelectorAll('.tabs-inner button').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.querySelectorAll('.tabs-inner button').forEach(function(b){b.classList.remove('active');});
+      btn.classList.add('active');
+      ['people','flats','compare'].forEach(function(name){
+        $('screen-'+name).hidden = (name !== btn.dataset.tab);
+      });
+      if (btn.dataset.tab === 'compare') renderCompare();
+    });
+  });
+
+  /* ---------------- nice-to-have chip builders ---------------- */
+  function buildChips(container, prefix){
+    container.innerHTML = '';
+    NICE_TO_HAVES.forEach(function(item){
+      var label = document.createElement('label');
+      label.className = 'chip';
+      var input = document.createElement('input');
+      input.type = 'checkbox';
+      input.id = prefix + '-' + item.key;
+      input.value = item.key;
+      label.appendChild(input);
+      label.appendChild(document.createTextNode(item.label));
+      container.appendChild(label);
+    });
+  }
+  buildChips($('p-niceToHaves'), 'pnh');
+  buildChips($('f-niceToHaves'), 'fnh');
+
+  function getCheckedChips(prefix){
+    return NICE_TO_HAVES.filter(function(item){
+      var el = $(prefix + '-' + item.key);
+      return el && el.checked;
+    }).map(function(item){ return item.key; });
+  }
+  function setCheckedChips(prefix, keys){
+    keys = keys || [];
+    NICE_TO_HAVES.forEach(function(item){
+      var el = $(prefix + '-' + item.key);
+      if (el) el.checked = keys.indexOf(item.key) !== -1;
+    });
+  }
+
+  /* ---------------- person picker ---------------- */
+  function renderPersonPicker(){
+    var wrap = $('personPicker');
+    wrap.innerHTML = '';
+    PEOPLE.forEach(function(p){
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'person-btn' + (p.id === currentPerson ? ' active' : '') + (state.people[p.id] ? ' filled' : '');
+      btn.innerHTML = '<span class="dot"></span>' + esc(p.name) + '<small>' + (state.people[p.id] ? 'saved' : 'not filled yet') + '</small>';
+      btn.addEventListener('click', function(){ selectPerson(p.id); });
+      wrap.appendChild(btn);
+    });
+  }
+
+  function fillPersonForm(data){
+    data = data || {};
+    $('p-maxRent').value = data.maxRent != null ? data.maxRent : '';
+    $('p-excludedAreas').value = (data.excludedAreas || []).join(', ');
+    $('p-needsLift').checked = !!data.needsLift;
+    $('p-needsParking').checked = !!data.needsParking;
+    $('p-petFriendly').checked = !!data.needsPetFriendly;
+    $('p-minBathrooms').value = data.minBathrooms != null ? data.minBathrooms : '';
+    setCheckedChips('pnh', data.niceToHaves);
+    $('p-otherNotes').value = data.otherNotes || '';
+    $('personSaveMsg').textContent = '';
+  }
+
+  function selectPerson(id){
+    currentPerson = id;
+    renderPersonPicker();
+    fillPersonForm(state.people[id]);
+  }
+
+  $('personForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    var payload = {
+      name: PEOPLE.filter(function(p){return p.id===currentPerson;})[0].name,
+      maxRent: Number($('p-maxRent').value) || 0,
+      excludedAreas: $('p-excludedAreas').value.split(',').map(function(s){return s.trim().toLowerCase();}).filter(Boolean),
+      needsLift: $('p-needsLift').checked,
+      needsParking: $('p-needsParking').checked,
+      needsPetFriendly: $('p-petFriendly').checked,
+      minBathrooms: Number($('p-minBathrooms').value) || 0,
+      niceToHaves: getCheckedChips('pnh'),
+      otherNotes: $('p-otherNotes').value.trim(),
+      updatedAt: new Date().toISOString()
+    };
+    $('personSaveMsg').textContent = 'Saving…';
+    api('/api/data', {
+      method: 'POST',
+      headers: {'content-type':'application/json'},
+      body: JSON.stringify({action:'savePerson', personId: currentPerson, data: payload})
+    }).then(function(data){
+      state = data;
+      renderPersonPicker();
+      $('personSaveMsg').textContent = 'Saved ✓';
+    }).catch(function(err){
+      console.error(err);
+      $('personSaveMsg').textContent = 'Could not save — try again.';
+    });
+  });
+
+  /* ---------------- flats: add + list ---------------- */
+  $('flatForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    var area = $('f-area').value.trim();
+    var rent = Number($('f-rent').value) || 0;
+    if (!area || !rent) { $('flatSaveMsg').textContent = 'Area and rent are required.'; return; }
+    var payload = {
+      area: area,
+      rent: rent,
+      floor: $('f-floor').value.trim(),
+      bathrooms: Number($('f-bathrooms').value) || 0,
+      lift: $('f-lift').value === 'yes',
+      parking: $('f-parking').value === 'yes',
+      petPolicy: $('f-petPolicy').value,
+      niceToHaves: getCheckedChips('fnh'),
+      notes: $('f-notes').value.trim(),
+      createdAt: new Date().toISOString()
+    };
+    $('flatSaveMsg').textContent = 'Saving…';
+    api('/api/data', {
+      method: 'POST',
+      headers: {'content-type':'application/json'},
+      body: JSON.stringify({action:'addFlat', data: payload})
+    }).then(function(data){
+      state = data;
+      renderFlatsList();
+      $('flatSaveMsg').textContent = 'Added ✓';
+      $('flatForm').reset();
+      setCheckedChips('fnh', []);
+      $('f-lift').value = 'yes';
+      $('f-parking').value = 'yes';
+      $('f-petPolicy').value = 'allowed';
+    }).catch(function(err){
+      console.error(err);
+      $('flatSaveMsg').textContent = 'Could not save — try again.';
+    });
+  });
+
+  function renderFlatsList(){
+    var wrap = $('flatsList');
+    if (!state.flats.length) { wrap.innerHTML = '<p class="empty-state">No flats added yet.</p>'; return; }
+    wrap.innerHTML = '';
+    state.flats.forEach(function(flat){
+      var row = document.createElement('div');
+      row.className = 'flat-row';
+      row.innerHTML =
+        '<div>' +
+          '<div class="name">' + esc(flat.area) + ' <span class="mono">₹' + Number(flat.rent).toLocaleString('en-IN') + '</span></div>' +
+          '<div class="meta">Floor ' + esc(flat.floor||'—') + ' · ' + esc(flat.bathrooms||0) + ' bath · lift ' + (flat.lift?'yes':'no') + ' · parking ' + (flat.parking?'yes':'no') + ' · ' + esc(flat.petPolicy) + '</div>' +
+        '</div>';
+      var del = document.createElement('button');
+      del.className = 'icon-btn';
+      del.title = 'Remove this flat';
+      del.textContent = '✕';
+      del.addEventListener('click', function(){
+        api('/api/data', {
+          method:'POST',
+          headers:{'content-type':'application/json'},
+          body: JSON.stringify({action:'deleteFlat', id: flat.id})
+        }).then(function(data){
+          state = data;
+          renderFlatsList();
+          if (!$('screen-compare').hidden) renderCompare();
+        }).catch(function(err){ console.error(err); });
+      });
+      row.appendChild(del);
+      wrap.appendChild(row);
+    });
+  }
+
+  /* ---------------- comparison rendering ---------------- */
+  function renderCompare(){
+    var people = PEOPLE.map(function(p){ return state.people[p.id] ? Object.assign({id:p.id}, state.people[p.id]) : null; }).filter(Boolean);
+    var missing = PEOPLE.filter(function(p){ return !state.people[p.id]; }).map(function(p){return p.name;});
+
+    var statusEl = $('compareStatus');
+    if (missing.length) {
+      statusEl.hidden = false;
+      statusEl.textContent = (missing.length === 3 ? 'Nobody' : missing.join(' and ')) + ' hasn’t filled in requirements yet — comparisons below only reflect ' + (people.length ? people.map(function(p){return p.name;}).join(' and ') : 'nobody') + ' so far.';
+    } else {
+      statusEl.hidden = true;
+    }
+
+    if (!state.flats.length) {
+      $('resultsGrid').innerHTML = '<p class="empty-state">No flats added yet — add one from the "Add a Flat" tab.</p>';
+      $('eliminatedBox').hidden = true;
+      return;
+    }
+    if (!people.length) {
+      $('resultsGrid').innerHTML = '<p class="empty-state">Add at least one person’s requirements to see a comparison.</p>';
+      $('eliminatedBox').hidden = true;
+      return;
+    }
+
+    var survivors = [], eliminated = [];
+    state.flats.forEach(function(flat){
+      var allReasons = [];
+      people.forEach(function(person){
+        allReasons = allReasons.concat(checkDealbreakers(person, flat));
+      });
+      if (allReasons.length) {
+        eliminated.push({flat: flat, reasons: allReasons});
+      } else {
+        var s = scoreFlat(people, flat);
+        survivors.push({flat: flat, score: s});
+      }
+    });
+
+    survivors.sort(function(a,b){
+      var pa = a.score.totalWanted ? a.score.totalMatched/a.score.totalWanted : 0;
+      var pb = b.score.totalWanted ? b.score.totalMatched/b.score.totalWanted : 0;
+      if (pb !== pa) return pb - pa;
+      return a.flat.rent - b.flat.rent;
+    });
+    var top = survivors.slice(0, 3);
+
+    var grid = $('resultsGrid');
+    if (!top.length) {
+      grid.innerHTML = '<p class="empty-state">Every flat added so far breaks at least one dealbreaker. See "Flats ruled out" below.</p>';
+    } else {
+      grid.innerHTML = '';
+      top.forEach(function(entry, idx){
+        grid.appendChild(buildFlatCard(entry, idx, people));
+      });
+    }
+
+    var elimBox = $('eliminatedBox');
+    if (eliminated.length) {
+      elimBox.hidden = false;
+      $('eliminatedSummary').textContent = eliminated.length + ' flat' + (eliminated.length===1?'':'s') + ' ruled out';
+      var list = $('eliminatedList');
+      list.innerHTML = '';
+      eliminated.forEach(function(e){
+        var div = document.createElement('div');
+        div.className = 'elim-item';
+        div.innerHTML = '<b>' + esc(e.flat.area) + '</b> (₹' + Number(e.flat.rent).toLocaleString('en-IN') + ') — ' + e.reasons.map(esc).join('; ');
+        list.appendChild(div);
+      });
+    } else {
+      elimBox.hidden = true;
+    }
+  }
+
+  function buildFlatCard(entry, idx, people){
+    var flat = entry.flat, score = entry.score;
+    var pct = score.totalWanted ? Math.round(100*score.totalMatched/score.totalWanted) : 100;
+    var card = document.createElement('div');
+    card.className = 'flat-card' + (idx===0 ? ' best' : '');
+    var rankLabel = idx===0 ? 'Top match' : ('#' + (idx+1));
+
+    var factList =
+      '<div class="fact-list">' +
+        '<div>Floor: <b>' + esc(flat.floor||'—') + '</b></div>' +
+        '<div>Bathrooms: <b>' + esc(flat.bathrooms||0) + '</b></div>' +
+        '<div>Lift: <b>' + (flat.lift?'Yes':'No') + '</b></div>' +
+        '<div>Parking: <b>' + (flat.parking?'Yes':'No') + '</b></div>' +
+        '<div>Pets: <b>' + esc(flat.petPolicy) + '</b></div>' +
+        '<div>Nice-to-haves: <b>' + (flat.niceToHaves||[]).length + '</b></div>' +
+      '</div>';
+
+    var personMatchHtml = people.map(function(p){
+      var pm = score.perPerson[p.id];
+      var okPart = pm.matched.length ? '<span class="match-ok">' + pm.matched.length + ' matched</span>' : '<span class="match-gap">none matched</span>';
+      var gapPart = pm.gap.length ? (' · missing ' + pm.gap.map(labelFor).join(', ')) : (pm.matched.length ? ' · gets everything they wanted' : '');
+      return '<div class="person-match"><b>' + esc(pm.name) + '</b>' + okPart + '<span class="match-gap">' + esc(gapPart) + '</span></div>';
+    }).join('');
+
+    card.innerHTML =
+      '<span class="rank-badge">' + rankLabel + '</span>' +
+      '<h3>' + esc(flat.area) + '</h3>' +
+      '<div class="rent mono">₹' + Number(flat.rent).toLocaleString('en-IN') + '/mo</div>' +
+      factList +
+      '<div class="score-bar-track"><div class="score-bar-fill" style="width:' + pct + '%"></div></div>' +
+      '<div class="score-label">' + score.totalMatched + ' of ' + score.totalWanted + ' preferences matched (' + pct + '%)</div>' +
+      personMatchHtml +
+      (flat.notes ? '<p class="hint" style="margin-top:10px;">"' + esc(flat.notes) + '"</p>' : '') +
+      '<div class="ai-box"><div class="ai-summary-slot"></div></div>';
+
+    var slot = card.querySelector('.ai-summary-slot');
+    renderAiSlot(slot, flat);
+
+    return card;
+  }
+
+  function renderAiSlot(slot, flat){
+    if (flat.aiSummary) {
+      slot.innerHTML = '<div class="ai-text">' + esc(flat.aiSummary) + '</div><button type="button" class="btn ghost" style="margin-top:8px;font-size:.8rem;padding:6px 14px;">Regenerate summary</button>';
+      slot.querySelector('button').addEventListener('click', function(){ generateSummary(flat, slot); });
+      return;
+    }
+    slot.innerHTML = '<button type="button" class="btn secondary">Write plain-English summary</button>';
+    slot.querySelector('button').addEventListener('click', function(){ generateSummary(flat, slot); });
+  }
+
+  function generateSummary(flat, slot){
+    slot.innerHTML = '<div class="ai-text loading">Writing summary…</div>';
+    api('/api/summarize', {
+      method: 'POST',
+      headers: {'content-type':'application/json'},
+      body: JSON.stringify({flatId: flat.id})
+    }).then(function(res){
+      flat.aiSummary = res.summary;
+      slot.innerHTML = '<div class="ai-text">' + esc(res.summary) + '</div><button type="button" class="btn ghost" style="margin-top:8px;font-size:.8rem;padding:6px 14px;">Regenerate summary</button>';
+      slot.querySelector('button').addEventListener('click', function(){ generateSummary(flat, slot); });
+    }).catch(function(err){
+      console.error(err);
+      slot.innerHTML = '<div class="ai-text">Couldn’t reach Claude for a summary right now (' + esc(err.message) + '). Try again in a moment.</div>';
+    });
+  }
+
+  /* ---------------- data loading ---------------- */
+  function loadData(){
+    return api('/api/data').then(function(data){
+      state.people = data.people || {};
+      state.flats = data.flats || [];
+      renderPersonPicker();
+      renderFlatsList();
+      if (!$('screen-compare').hidden) renderCompare();
+      return state;
+    }).catch(function(err){
+      console.error('Could not load data', err);
+    });
+  }
+
+  /* ---------------- boot ---------------- */
+  loadData().then(function(){
+    fillPersonForm(state.people[currentPerson]);
+  });
+
+  // Light polling so friends see each other's updates without a refresh,
+  // without disturbing whatever the viewer is actively typing.
+  pollTimer = setInterval(loadData, 20000);
+
+})();
+</script>
+</body>
+</html>
